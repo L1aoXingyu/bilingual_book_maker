@@ -63,6 +63,54 @@ bbook --book_name test_books/animal_farm.epub --openai_key ${openai_key} --test
   python3 make_book.py --book_name test_books/animal_farm.epub --model claude --claude_key ${claude_key}
   ```
 
+* **Agentic Mode** (Claude Code SDK)
+
+  Enable advanced agentic translation capabilities using the Claude Code SDK. This mode provides enhanced context understanding and more sophisticated translations.
+
+  **Prerequisites**:
+  - Claude desktop app must be running
+  - No API key required (authentication handled by the desktop app)
+
+  **Installation**:
+  ```shell
+  # Install with agentic extras
+  pip install -e .[agentic]
+  # Or if using pip directly
+  pip install bbook-maker[agentic]
+  ```
+
+  **Basic usage**:
+  ```shell
+  # Use claude-code models (automatically enables agentic mode) - NO API KEY NEEDED
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude-code
+  
+  # Or enable agentic mode for regular Claude models
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude --agentic
+  
+  # Use specific Claude Code models
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude-code-sonnet
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude-code-opus
+  ```
+
+  **Advanced configuration**:
+  ```shell
+  # Configure agentic options with JSON
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude-code \
+    --agentic_options '{"allowed_tools":["Read"],"max_turns":2}'
+  
+  # Or use a JSON file for complex configurations
+  echo '{"allowed_tools":["Read","WebSearch"],"max_turns":3}' > agentic_config.json
+  python3 make_book.py --book_name test_books/animal_farm.epub --model claude-code \
+    --agentic_options agentic_config.json
+  ```
+
+  **Notes**:
+  - Agentic mode requires the Claude Code SDK (`claude-code-sdk>=0.0.20`) and Claude desktop app
+  - No API key required - authentication is handled through the Claude desktop app
+  - Default behavior remains unchanged - agentic mode is opt-in
+  - By default, only the "Read" tool is enabled for safe local context access
+  - Falls back to regular Claude translator if SDK is not installed (requires API key for fallback)
+
 * Google Translate
 
   ```shell
@@ -232,6 +280,22 @@ bbook --book_name test_books/animal_farm.epub --openai_key ${openai_key} --test
 - `--translation_style`:
 
   example: `--translation_style "color: #808080; font-style: italic;"`
+
+- `--agentic`:
+
+  Enable agentic mode for Claude models using the Claude Code SDK. This provides enhanced translation capabilities with better context understanding. Automatically enabled when using `claude-code` models. No API key required when using agentic mode - authentication is handled through the Claude desktop app.
+  
+  example: `--model claude --agentic`
+
+- `--agentic_options`:
+
+  Configure Claude Code SDK options as JSON string or path to JSON file. Available options include:
+  - `allowed_tools`: List of tools to enable (default: `["Read"]`)
+  - `max_turns`: Maximum conversation turns (default: `1`)
+  - `permission_mode`: Permission handling mode (default: `"default"`)
+  
+  example: `--agentic_options '{"allowed_tools":["Read","WebSearch"],"max_turns":2}'`
+  or: `--agentic_options path/to/config.json`
 
 - `--retranslate "$translated_filepath" "file_name_in_epub" "start_str" "end_str"(optional)`:
 

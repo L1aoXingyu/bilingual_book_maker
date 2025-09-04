@@ -36,6 +36,8 @@ class EPUBBookLoader(BaseBookLoader):
         context_paragraph_limit=0,
         temperature=1.0,
         source_lang="auto",
+        agentic=False,
+        agentic_options=None,
     ):
         self.epub_name = epub_name
         self.new_epub = epub.EpubBook()
@@ -47,6 +49,8 @@ class EPUBBookLoader(BaseBookLoader):
             context_paragraph_limit=context_paragraph_limit,
             temperature=temperature,
             source_lang=source_lang,
+            agentic=agentic,
+            agentic_options=agentic_options,
             **prompt_config_to_kwargs(prompt_config),
         )
         self.is_test = is_test

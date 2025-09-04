@@ -102,6 +102,24 @@ def parse_prompt_arg(prompt_arg):
     return prompt
 
 
+def parse_agentic_options(options_arg):
+    """Parse agentic options from JSON string or file."""
+    if options_arg is None:
+        return {}
+    
+    # Check if it's a file path
+    if os.path.exists(options_arg):
+        with open(options_arg, encoding="utf-8") as f:
+            return json.load(f)
+    
+    # Otherwise treat as JSON string
+    try:
+        return json.loads(options_arg)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing agentic options: {e}")
+        return {}
+
+
 def main():
     translate_model_list = list(MODEL_DICT.keys())
     parser = argparse.ArgumentParser()
@@ -398,6 +416,19 @@ So you are close to reaching the limit. You have to choose your own value, there
         default=0.01,
         help="Request interval in seconds (e.g., 0.1 for 100ms). Currently only supported for Gemini models. Default: 0.01",
     )
+    parser.add_argument(
+        "--agentic",
+        dest="agentic",
+        action="store_true",
+        default=False,
+        help="Enable agentic mode for Claude models using Claude Code SDK (requires installation with pip install bbook-maker[agentic])",
+    )
+    parser.add_argument(
+        "--agentic_options",
+        dest="agentic_options",
+        type=str,
+        help="Configure Claude Code SDK options as JSON string or path to JSON file. Example: --agentic_options '{\"allowed_tools\":[\"Read\",\"WebSearch\"],\"max_turns\":2}'",
+    )
 
     options = parser.parse_args()
 
@@ -413,8 +444,17 @@ So you are close to reaching the limit. You have to choose your own value, there
         os.environ["http_proxy"] = PROXY
         os.environ["https_proxy"] = PROXY
 
-    translate_model = MODEL_DICT.get(options.model)
-    assert translate_model is not None, "unsupported model"
+    # Determine if we should use agentic mode
+    use_agentic = options.agentic or options.model.startswith("claude-code")
+    
+    # If agentic mode is requested with regular claude model, use ClaudeCodeTranslator
+    if use_agentic and options.model in ["claude", "claude-3-5-sonnet-latest", "claude-3-5-sonnet-20241022", 
+                                          "claude-3-5-sonnet-20240620", "claude-3-5-haiku-latest", "claude-3-5-haiku-20241022"]:
+        from book_maker.translator.claude_code_translator import ClaudeCodeTranslator
+        translate_model = ClaudeCodeTranslator
+    else:
+        translate_model = MODEL_DICT.get(options.model)
+        assert translate_model is not None, "unsupported model"
     API_KEY = ""
     if options.model in [
         "openai",
@@ -455,7 +495,10 @@ So you are close to reaching the limit. You have to choose your own value, there
             raise Exception("Please provide deepl key")
     elif options.model.startswith("claude"):
         API_KEY = options.claude_key or env.get("BBM_CLAUDE_API_KEY")
-        if not API_KEY:
+        # Claude Code SDK doesn't need API key
+        if options.model.startswith("claude-code") or (options.agentic and options.model.startswith("claude")):
+            API_KEY = API_KEY or ""  # Allow empty key for Claude Code SDK
+        elif not API_KEY:
             raise Exception("Please provide claude key")
     elif options.model == "customapi":
         API_KEY = options.custom_api or env.get("BBM_CUSTOM_API")
@@ -508,6 +551,9 @@ So you are close to reaching the limit. You have to choose your own value, there
         # ollama default api_base
         model_api_base = "http://localhost:11434/v1"
 
+    # Parse agentic options
+    agentic_options = parse_agentic_options(options.agentic_options)
+    
     e = book_loader(
         options.book_name,
         translate_model,
@@ -523,6 +569,8 @@ So you are close to reaching the limit. You have to choose your own value, there
         context_paragraph_limit=options.context_paragraph_limit,
         temperature=options.temperature,
         source_lang=options.source_lang,
+        agentic=use_agentic,
+        agentic_options=agentic_options,
     )
     # other options
     if options.allow_navigable_strings:
