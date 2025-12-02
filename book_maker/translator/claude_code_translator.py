@@ -98,7 +98,7 @@ class ClaudeCodeTranslator(Base):
         
         # Set model based on the chosen variant
         if 'model' not in self.sdk_options:
-            self.sdk_options['model'] = 'claude-3-5-sonnet-20241022'  # Default model
+            self.sdk_options['model'] = 'glm-4.5'  # Default to GLM4.5 model
 
     def rotate_key(self):
         """Rotate API keys if multiple are provided"""
@@ -164,6 +164,13 @@ class ClaudeCodeTranslator(Base):
         # Create SDK options
         options = ClaudeCodeOptions(**self.sdk_options)
         
+        # Configure environment variables for BigModel.cn if not already set
+        import os
+        if not os.getenv('ANTHROPIC_BASE_URL'):
+            os.environ['ANTHROPIC_BASE_URL'] = 'https://open.bigmodel.cn/api/anthropic'
+        if not os.getenv('ANTHROPIC_MODEL'):
+            os.environ['ANTHROPIC_MODEL'] = 'glm-4.5'
+        
         # Perform the translation
         response_text = ""
         async for message in query(prompt=full_prompt, options=options):
@@ -221,5 +228,7 @@ class ClaudeCodeTranslator(Base):
                 "claude-code-sonnet": "claude-3-5-sonnet-20241022",
                 "claude-code-opus": "claude-opus-4-20250514",
                 "claude-code": "claude-3-5-sonnet-20241022",  # Default
+                "glm-4.5": "glm-4.5",  # GLM4.5 model
+                "glm": "glm-4.5",  # Short alias for GLM4.5
             }
             self.sdk_options['model'] = model_mapping.get(model_name, model_name)

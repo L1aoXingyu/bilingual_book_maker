@@ -9,7 +9,7 @@ The bilingual_book_maker is an AI translation tool that uses ChatGPT to assist u
 
 ## Supported Models
 
-gpt-4, gpt-3.5-turbo, claude-2, palm, llama-2, azure-openai, command-nightly, gemini, qwen-mt-turbo, qwen-mt-plus
+gpt-4, gpt-3.5-turbo, deepseek-chat, deepseek-reasoner, claude-2, palm, llama-2, azure-openai, command-nightly, gemini, qwen-mt-turbo, qwen-mt-plus
 For using Non-OpenAI models, use class `liteLLM()` - liteLLM supports all models above.
 Find more info here for using liteLLM: https://github.com/BerriAI/litellm/blob/main/setup.py
 
@@ -41,6 +41,25 @@ bbook --book_name test_books/animal_farm.epub --openai_key ${openai_key} --test
 - Important to note that `gpt-4` is significantly more expensive than `gpt-4-turbo`, but to avoid bumping into rate limits, we automatically balance queries across `gpt-4-1106-preview`, `gpt-4`, `gpt-4-32k`, `gpt-4-0613`,`gpt-4-32k-0613`.
 - If you want to use a specific model alias with OpenAI (eg `gpt-4-1106-preview` or `gpt-3.5-turbo-0125`), you can use `--model openai --model_list gpt-4-1106-preview,gpt-3.5-turbo-0125`. `--model_list` takes a comma-separated list of model aliases.
 - If using chatgptapi, you can add `--use_context` to add a context paragraph to each passage sent to the model for translation (see below).
+
+* DeepSeek (OpenAI-compatible)
+
+  DeepSeek exposes the same Chat Completions schema as OpenAI. Point the base URL to DeepSeek and pick a DeepSeek model.
+
+  ```shell
+  # Default DeepSeek chat model
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek --deepseek_key ${DEEPSEEK_API_KEY}
+
+  # Thinking model
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek-reasoner --deepseek_key ${DEEPSEEK_API_KEY}
+
+  # Custom DeepSeek endpoint / model list
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek --model_list deepseek-chat,deepseek-reasoner \
+    --api_base https://api.deepseek.com --deepseek_key ${DEEPSEEK_API_KEY}
+  ```
 
 * DeepL
   Support DeepL model [DeepL Translator](https://rapidapi.com/splintPRO/api/dpl-translator) need pay to get the token

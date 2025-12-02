@@ -170,6 +170,12 @@ def main():
         type=str,
         help="you can find claude key from here (https://console.anthropic.com/account/keys)",
     )
+    parser.add_argument(
+        "--deepseek_key",
+        dest="deepseek_key",
+        type=str,
+        help="DeepSeek API key, falls back to env BBM_DEEPSEEK_API_KEY or DEEPSEEK_API_KEY",
+    )
 
     parser.add_argument(
         "--custom_api",
@@ -396,7 +402,7 @@ So you are close to reaching the limit. You have to choose your own value, there
         "--model_list",
         type=str,
         dest="model_list",
-        help="Rather than using our preset lists of models, specify exactly the models you want as a comma separated list `gpt-4-32k,gpt-3.5-turbo-0125` (Currently only supports: `openai`)",
+        help="Rather than using our preset lists of models, specify exactly the models you want as a comma separated list `gpt-4-32k,gpt-3.5-turbo-0125` (Supports `openai`, `deepseek`, `groq`)",
     )
     parser.add_argument(
         "--batch",
@@ -445,11 +451,12 @@ So you are close to reaching the limit. You have to choose your own value, there
         os.environ["https_proxy"] = PROXY
 
     # Determine if we should use agentic mode
-    use_agentic = options.agentic or options.model.startswith("claude-code")
+    use_agentic = options.agentic or options.model.startswith("claude-code") or options.model.startswith("glm")
     
-    # If agentic mode is requested with regular claude model, use ClaudeCodeTranslator
+    # If agentic mode is requested with regular claude model or GLM model, use ClaudeCodeTranslator
     if use_agentic and options.model in ["claude", "claude-3-5-sonnet-latest", "claude-3-5-sonnet-20241022", 
-                                          "claude-3-5-sonnet-20240620", "claude-3-5-haiku-latest", "claude-3-5-haiku-20241022"]:
+                                          "claude-3-5-sonnet-20240620", "claude-3-5-haiku-latest", "claude-3-5-haiku-20241022",
+                                          "glm-4.5", "glm"]:
         from book_maker.translator.claude_code_translator import ClaudeCodeTranslator
         translate_model = ClaudeCodeTranslator
     else:
@@ -493,13 +500,17 @@ So you are close to reaching the limit. You have to choose your own value, there
         API_KEY = options.deepl_key or env.get("BBM_DEEPL_API_KEY")
         if not API_KEY:
             raise Exception("Please provide deepl key")
-    elif options.model.startswith("claude"):
-        API_KEY = options.claude_key or env.get("BBM_CLAUDE_API_KEY")
+    elif options.model.startswith("claude") or options.model.startswith("glm"):
+        API_KEY = options.claude_key or env.get("BBM_CLAUDE_API_KEY") or env.get("ANTHROPIC_AUTH_TOKEN")
         # Claude Code SDK doesn't need API key
-        if options.model.startswith("claude-code") or (options.agentic and options.model.startswith("claude")):
+        if options.model.startswith("claude-code") or options.model.startswith("glm") or (options.agentic and options.model.startswith("claude")):
             API_KEY = API_KEY or ""  # Allow empty key for Claude Code SDK
         elif not API_KEY:
             raise Exception("Please provide claude key")
+    elif options.model.startswith("deepseek"):
+        API_KEY = options.deepseek_key or env.get("BBM_DEEPSEEK_API_KEY") or env.get("DEEPSEEK_API_KEY")
+        if not API_KEY:
+            raise Exception("Please provide deepseek key")
     elif options.model == "customapi":
         API_KEY = options.custom_api or env.get("BBM_CUSTOM_API")
         if not API_KEY:
@@ -615,6 +626,13 @@ So you are close to reaching the limit. You have to choose your own value, there
             raise ValueError(
                 "When using `openai` model, you must also provide `--model_list`. For default model sets use `--model chatgptapi` or `--model gpt4` or `--model gpt4omini`",
             )
+    if options.model.startswith("deepseek"):
+        if options.model_list:
+            e.translate_model.set_model_list(options.model_list.split(","))
+        elif options.model == "deepseek-reasoner":
+            e.translate_model.set_model_list(["deepseek-reasoner"])
+        else:
+            e.translate_model.set_model_list(["deepseek-chat"])
     # TODO refactor, quick fix for gpt4 model
     if options.model == "chatgptapi":
         if options.ollama_model:

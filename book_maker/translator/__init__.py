@@ -4,6 +4,7 @@ from book_maker.translator.deepl_translator import DeepL
 from book_maker.translator.deepl_free_translator import DeepLFree
 from book_maker.translator.google_translator import Google
 from book_maker.translator.claude_translator import Claude
+from book_maker.translator.deepseek_translator import DeepSeekTranslator
 from book_maker.translator.gemini_translator import Gemini
 from book_maker.translator.groq_translator import GroqClient
 from book_maker.translator.tencent_transmart_translator import TencentTranSmart
@@ -44,5 +45,10 @@ MODEL_DICT = {
     "claude-code": ClaudeCodeTranslator,
     "claude-code-sonnet": ClaudeCodeTranslator,
     "claude-code-opus": ClaudeCodeTranslator,
+    "glm-4.5": ClaudeCodeTranslator,
+    "glm": ClaudeCodeTranslator,
+    "deepseek": DeepSeekTranslator,
+    "deepseek-chat": DeepSeekTranslator,
+    "deepseek-reasoner": DeepSeekTranslator,
     # add more here
 }

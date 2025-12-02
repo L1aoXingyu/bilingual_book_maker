@@ -13,6 +13,11 @@ bbook_maker --book_name test_books/Lex_Fridman_episode_322.srt --openai_key ${op
 bbook_maker --book_name test_books/animal_farm.epub --openai_key ${openai_key}  --test --language zh-hans
 ```
 
+```sh
+# Use DeepSeek instead of OpenAI
+bbook_maker --book_name test_books/animal_farm.epub --model deepseek --deepseek_key ${DEEPSEEK_API_KEY} --test
+```
+
 `--test_num <TEST_NUM>`<br>
 
 Use this option to set how many paragraph you want to translate for testing. Default is 10.

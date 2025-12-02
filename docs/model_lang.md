@@ -2,7 +2,7 @@
 ## Models
 `-m, --model <Model>` <br>
 
-Currently `bbook_maker` supports these models: `chatgptapi` , `gpt3` , `google` , `caiyun` , `deepl` , `deeplfree` , `gpt4` , `gpt4omini` , `o1-preview` , `o1` , `o1-mini` , `o3-mini` , `claude` , `customapi`.
+Currently `bbook_maker` supports these models: `chatgptapi` , `gpt3` , `google` , `caiyun` , `deepl` , `deeplfree` , `gpt4` , `gpt4omini` , `o1-preview` , `o1` , `o1-mini` , `o3-mini` , `claude` , `deepseek` , `deepseek-chat` , `deepseek-reasoner` , `customapi`.
 Default model is `chatgptapi` . 
 
 ### OPENAI models
@@ -50,6 +50,22 @@ There are three models you can choose from.
 **Note 1: Use `--openai_key` option to specify OpenAI API key. If you have multiple keys, separate them by commas (xxx, xxx, xxx) to reduce errors caused by API call limits.**
 
 **Note 2: You can just set the environment variable `BBM_OPENAI_API_KEY` instead the openai_key. See [Environment setting](settings.md).**
+
+### DeepSeek
+
+DeepSeek's API is OpenAI-compatible. Point the base URL to DeepSeek and provide your DeepSeek API key.
+
+* Default chat model
+
+        bbook_maker --book_name test_books/animal_farm.epub --model deepseek --deepseek_key ${DEEPSEEK_API_KEY}
+
+* Reasoning model
+
+        bbook_maker --book_name test_books/animal_farm.epub --model deepseek-reasoner --deepseek_key ${DEEPSEEK_API_KEY}
+
+* Custom DeepSeek endpoints or rotating models
+
+        bbook_maker --book_name test_books/animal_farm.epub --model deepseek --model_list deepseek-chat,deepseek-reasoner --api_base https://api.deepseek.com --deepseek_key ${DEEPSEEK_API_KEY}
 
 ### CAIYUN 
 

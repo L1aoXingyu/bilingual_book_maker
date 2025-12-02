@@ -29,6 +29,25 @@ bbook --book_name test_books/animal_farm.epub --openai_key ${openai_key} --test
   或者，指定环境变量 `BBM_OPENAI_API_KEY` 来略过这个选项。
 - 默认用了 [GPT-3.5-turbo](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) 模型，也就是 ChatGPT 正在使用的模型。
 
+* DeepSeek（OpenAI 兼容）
+
+  DeepSeek API 与 OpenAI 的 Chat Completions 协议兼容，只需把 base_url 指向 DeepSeek 并使用 DeepSeek 的模型名。
+
+  ```shell
+  # 默认聊天模型
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek --deepseek_key ${DEEPSEEK_API_KEY}
+
+  # 思维链模型
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek-reasoner --deepseek_key ${DEEPSEEK_API_KEY}
+
+  # 自定义模型列表 / 终端
+  python3 make_book.py --book_name test_books/animal_farm.epub \
+    --model deepseek --model_list deepseek-chat,deepseek-reasoner \
+    --api_base https://api.deepseek.com --deepseek_key ${DEEPSEEK_API_KEY}
+  ```
+
 * DeepL
 
   使用 DeepL 封装的 api 进行翻译，需要付费。[DeepL Translator](https://rapidapi.com/splintPRO/api/dpl-translator) 来获得 token
